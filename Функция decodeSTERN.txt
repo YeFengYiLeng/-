@@ -1,0 +1,34 @@
+function decodeSTERN(H::Matrix{Int}, s::Vector{Int}, t::Int, p::Int, ℓ::Int; niter::Int=-1)
+    r, n = size(H)
+    max_attempts = (niter < 0) ? factorial(r) : niter
+    for attempt in 1:max_attempts
+        # Генерируем все возможные подмножества индексов для веса t
+        indices = collect(1:n)
+        e_candidates = combinations(indices, t)
+        for e_subset in e_candidates
+            e = zeros(Int, n)
+            for index in e_subset
+                e[index] = 1
+            end
+            # Проверяем условие декодирования
+            if s' == H * e'  # Проверка условия s^T = He^T
+                return e
+            end
+        end
+    end
+    return niter  # Если решения не найдено
+end
+
+
+Параметры:
+#H — матрица проверки четности размерности (r × n).
+#s — вектор длины r.
+#t — максимально допустимый вес ошибки.
+#p и ℓ — параметры, специфичные для алгоритма Штерна.
+#niter — максимальное количество итераций (по умолчанию бесконечное).
+#Алгоритм:
+#Генерируются все возможные подмножества для весов.
+#Для каждого подмножества создается вектор ошибок e.
+#Проверка выполняется по формуле 
+#sT=HeT.
+#Если найдено решение, возвращается вектор e; иначе возвращается niter.
