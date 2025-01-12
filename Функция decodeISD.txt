@@ -1,0 +1,26 @@
+Функция decodeISD
+# Эта функция использует алгоритм декодирования с информационными множествами для нахождения векторов m и e по заданным параметрам.
+
+using LinearAlgebra
+
+function decodeISD(G::Matrix{Int}, y::Vector{Int}, t::Int; niter::Int=-1)
+    k, n = size(G)
+    max_attempts = (niter < 0) ? factorial(k) : niter
+    for attempt in 1:max_attempts
+        # Генерируем все возможные подмножества индексов для веса t
+        indices = collect(1:n)
+        e_candidates = combinations(indices, t)
+        for e_subset in e_candidates
+            e = zeros(Int, n)
+            for index in e_subset
+                e[index] = 1
+            end
+            # Вычисляем m
+            m = (y .- e) * pinv(G)  # m может быть вычислен как обратная матрица к G
+            if all(m .== round.(m)) && all(m .>= 0) && all(m .<= 1) # m должен быть 0 или 1
+                return (m, e)
+            end
+        end
+    end
+    return niter  # Если решения не найдено
+end
